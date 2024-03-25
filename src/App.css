@@ -23,6 +23,10 @@ body {
     margin: 5px;
     background-color: rgb(175, 243, 16);
 }
+.weather-button button:active {
+    border: 2px solid yellow;
+    background-color: yellow;
+}
 .temp-deco {
     color: white;
 }

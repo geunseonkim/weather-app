@@ -12,11 +12,13 @@ import ClipLoader from "react-spinners/ClipLoader";
 // 4. 유저는 버튼을 클릭하면 다른 도시의 날씨 정보도 볼 수 있다.
 // 5. 버튼을 클릭할 때마다(데이터 로딩시) 로딩 스피너가 보인다.
 function App() {
+  const API_KEY = `3b56745dd240621d3eaad2aac3d8a827`;
 
   const [weather, setWeather] = useState(null);
   const cities = ["Toronto", "Calgary", "Montreal", "Quebec"];
   const [city, setCity] = useState("");
   let [loading, setLoading] = useState(true);
+  const [apiError, setAPIError] = useState("");
 
   const getCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition((position) => {
@@ -27,52 +29,68 @@ function App() {
     })
 
     const getWeatherInfo = async(lat, lon) => {
-      const API_KEY = `3b56745dd240621d3eaad2aac3d8a827`;
+      try{
       let url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
       setLoading(true);
       let response = await fetch(url);
       let data = await response.json();
-      setWeather(data);
       setLoading(false);
+      setWeather(data);
+      } catch (error) {
+        setLoading(false);
+        setAPIError(error.message);
+      }
     }
   }
 
-  const getWeatherByCity = async() => {
-      const API_KEY = `3b56745dd240621d3eaad2aac3d8a827`;
+    const getWeatherByCity = async() => {
+      try{
       let url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
       setLoading(true);
       let response = await fetch(url);
       let data = await response.json();
       //console.log("data?", data);
-      setWeather(data);
       setLoading(false);
+      setWeather(data);
+      } catch (error) {
+        setLoading(false);
+        setAPIError(error.message);
+      }
   }
 
   useEffect(()=>{
-    if(city=="") {
+    if(city === "") {
       getCurrentLocation();
     } else {
       getWeatherByCity(); // 상황에 따라 실행하는 함수를 나눠준다. city 정보가 없을 때는 geocode를 받도록 한다.
     }
   }, [city])
 
+  const currentCity = (city) => {
+    if(city === "current") {
+      setCity("");
+    } else {
+      setCity(city);
+    }
+  }
+
   return (
     <div>
-      {loading?
-      <div className="container">
-        <ClipLoader
-          color="#FFA500"
-          loading={loading}
-          size={130}
-        />
-        </div>:
-      <div className="container">
+      {
+      loading ?
+      (<div className="container">
+        <ClipLoader color="#FFA500" loading={loading} size={130} />
+        </div>)
+        : !apiError ?
+      (<div className="container">
         <div>
           <WeatherBox weather={weather}/>
-          <WeatherButton cities={cities} setCity={setCity}/>
+          <WeatherButton cities={cities} currentCity={currentCity} setCity={setCity}/>
           {/* 함수도 props로 받을 수 있다. */}
         </div>
-      </div>}
+      </div>)
+      :(apiError)
+      }
     </div>
   );
 }
