@@ -16,8 +16,8 @@ function App() {
 
   const [weather, setWeather] = useState(null);
   const cities = ["Toronto", "Calgary", "Montreal", "Quebec"];
-  const [city, setCity] = useState("");
-  let [loading, setLoading] = useState(true);
+  const [city, setCity] = useState(null);
+  let [loading, setLoading] = useState(false);
   const [apiError, setAPIError] = useState("");
 
   const getCurrentLocation = () => {
@@ -59,16 +59,18 @@ function App() {
   }
 
   useEffect(()=>{
-    if(city === "") {
+    if(city == null) {
+      setLoading(true);
       getCurrentLocation();
     } else {
+      setLoading(true);
       getWeatherByCity(); // 상황에 따라 실행하는 함수를 나눠준다. city 정보가 없을 때는 geocode를 받도록 한다.
     }
   }, [city])
 
   const currentCity = (city) => {
     if(city === "current") {
-      setCity("");
+      setCity(null);
     } else {
       setCity(city);
     }
